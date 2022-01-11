@@ -35,11 +35,18 @@ var fightOrSkip = function() {
 
 var fight = function (enemy) 
 {
+    var isPlayerTurn = true;
+    
+    if (Math.random() > 0.5) {
+        isPlayerTurn = false;
+    }
   // Alert players that they are starting the round
   while (playerInfo.health > 0 && enemy.health > 0) {
-    if (fightOrSkip()) {
-        break;
-    } 
+      if (isPlayerTurn) {
+        if (fightOrSkip()) {
+            break; 
+        }
+
     var damage = randomNumber(playerInfo.attack - 3, playerInfo.attack);
 
     //Subtract the value of `playerInfo.attack` from the value of `enemy.health` and use that result to update the value in the `enemy.health` variable
@@ -62,13 +69,14 @@ var fight = function (enemy)
       if (enemy.health <= 0) {
         window.alert(enemy.name + " has died!");
 
-    playerInfo.money = Math.max(0, playerInfo.money - 10);
+    playerInfo.money = Math.max(0, playerInfo.money + 20);
 
         break;
       } else {
         window.alert(enemy.name + " still has " + enemy.health + " health left.");
       }
 
+    } else {
       // Subtract the value of `enemy.attack` from the value of `playerInfo.health` and use that result to update the value in the `playerInfo.health` variable.
       var damage = randomNumber(enemy.attack - 3, enemy.attack);
 
@@ -93,6 +101,8 @@ var fight = function (enemy)
         window.alert(
           playerInfo.name + " still has " + playerInfo.health + " health left.");
       }
+    }
+    isPlayerTurn = !isPlayerTurn;
     }
 };
 
@@ -181,12 +191,21 @@ var startGame = function()
 var endGame = function() 
 {
     window.alert("The game has now ended. Let's see how you did!");
-        if (playerInfo.health > 0) {
-            window.alert("Great job, you've survived the game! You now have a score " + playerInfo.money + ".");
-        }
-        else {
-            window.alert("You've lost your robot in battle.");
-        }
+
+    var highScore = localStorage.getItem("highscore");
+    if (highScore === null) {
+        highScore = 0;
+    }
+    if (playerInfo.money > highScore) {
+        localStorage.setItem("highscore", playerInfo.money);
+        localStorage.setItem("name", playerInfo.name);
+        
+        alert(playerInfo.name + " now has the high score of " + playerInfo.money + "!");
+    }
+    else {
+        alert(playerInfo.name + " did not beat the high score of " + highScore + ". Maybe next time!");
+    }
+       
     var playAgainConfirm = window.confirm("Would you like to play again?");
         if (playAgainConfirm) {
             startGame();
@@ -198,18 +217,16 @@ var endGame = function()
 
 var shop = function()
 {
-    var shopOptionPrompt = window.prompt("Would you like to REFILL your health, UPGRADE your attack, or LEAVE the store? Please enter one: 'REFILL', 'UPGRADE', or 'LEAVE' to make a choice.");
+    var shopOptionPrompt = window.prompt("Would you like to REFILL your health, UPGRADE your attack, or LEAVE the store? Please enter one 1 for REFILL, 2 for UPGRADE, or 3 for LEAVE.");
+    shopOptionPrompt = parseInt(shopOptionPrompt);
     switch (shopOptionPrompt) {
-        case "REFILL":
-        case "refill":
+        case 1:
             playerInfo.refillHealth();
             break;
-        case "UPGRADE":
-        case "upgrade":
+        case 2:
             playerInfo.upgradeAttack();
                 break;
-        case "LEAVE":
-        case "leave":
+        case 3:
                 window.alert("Leaving the store");
             break;
         default:
